@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html ng-app="soundmateApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+
+    <meta name="description" content="">
+    <meta name="author" content="Adrien Robert">
+    <link rel="icon" href="style/favicon3.png">
+
+    <meta property="og:site_name" content="Soundmate"/>
+    <meta property="og:title" content="Rejoins-nous sur Soundmate"/>
+    <meta property="og:description" content="Soundmate est une application de partage de musique en groupe. Créez un cercle d'écoute et partagez vos musiques préférées à la communauté !"/>
+    <meta property="og:image" content=" http://soundmate.arobert.me/sharing.jpg">
+    <meta property="og:url" content="http://soundmate.arobert.me/">
+    
+    <title>Soundmate</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="style/cover.css" rel="stylesheet">
+    <link href="style/dashboard.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.0.4/angular-material.css"> -->
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body ng-controller="menuController as menu">
+    <script src="https://code.angularjs.org/1.4.8/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.4.8/angular-cookies.js"></script>
+    <script src="https://code.angularjs.org/1.4.8/angular-animate.min.js"></script>
+    <script src="https://code.angularjs.org/1.4.8/angular-aria.min.js"></script>
+    <script src="https://code.angularjs.org/1.4.8/angular-messages.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="js/angular-youtube-embed.min.js"></script>
+    <!-- <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script> -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.color.js"></script>
+    <!-- <script src="../angularBase/ui-bootstrap.min.js"></script> -->
+    <script src="js/app.js"></script>
+
+
+
+
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+        
+
+          <!-- HEADER -->
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand"><img class="brandLogo" id="1" src="img/logoWhite.png"><img class="brandLogo" id="2" src="img/logoBlack.png" style="opacity:0;margin-left:-220px;"></h3>
+              <ul class="nav masthead-nav">
+                
+                <li ng-hide="menu.isConnected()"><a href="#">Connection</a></li>
+
+                <li ng-show="menu.isConnected()">
+                  Bienvenue <span class="username">{{menu.getUsername() | capitalize}}</span>
+                </li>
+                <li ng-show="menu.isConnected() && menu.isSelected(2)"><a ng-click="menu.changeTab(1)" >Changer de cercle</a></li>
+                <li ng-show="menu.isConnected() && menu.isSelected(1)"><a ng-click="menu.changeTab(2)" >Acceuil</a></li>
+                <li ng-show="menu.isConnected()">
+                  <a href="#" ng-click="menu.logout()">Se déconnecter</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- CONTAINER -->
+        <div class="cover-container">
+          
+
+
+          <div ng-hide="tab" class="inner cover loginForm">
+            <form class="form-signin" role="form" method="post" ng-submit="menu.login()">
+              <h2 class="form-signin-heading">Choisissez un surnom</h2>
+              <input type="text" ng-model="user_name" name="user_name" class="form-control" placeholder="Pseudonyme">
+              <br>
+              <input type="password" ng-model="password" name="password" class="form-control" placeholder="Mot de passe">
+              
+
+              <div ng-show="menu.result" class='feedbackBox'>
+                <p class="bg-success" style="padding:8px;" ng-show="menu.result.value">{{menu.result.status}}
+                <span class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span></p>
+                <p class="bg-danger" style="padding:8px;" ng-hide="menu.result.value">{{menu.result.status}}
+                <span class="glyphicon glyphicon-remove pull-right" aria-hidden="true"></span></p>
+              </div>
+            
+
+              <button class="btn btn-lg btn-primary btn-block" type="submit">Se connecter</button>
+            </form>
+          </div>
+          
+
+          <div class="circleManagePage row" ng-show="menu.isSelected(1)" ng-controller="CircleController as circleC">
+            <div class="col-md-7" style="padding-right: 50px;">
+              <h2 ng-if="menu.getUserCircle()==0">Choisissez un cercle d'écoute !</h2>
+              <h2 ng-if="menu.getUserCircle()!=0">Changer de cercle d'écoute :</h2>
+
+              <h3>Cercles publique:</h3>
+              <ul type="none" class="circleList" id="publicCircleList">
+                <li ng-repeat="circle in circleC.publicCircles" value="{{circle.key}}" ng-class="menu.getUserCircle()==circle.key ? 'active' : 'blaa'" ng-click="circleC.setCurrentCircle(circle.key)">
+                  <div class="userCountPast">{{circle.value.user_count}}</div>
+                  {{circle.value.circle_name}} 
+                </li>
+              </ul>
+
+              <h3>Cercles privé:</h3>
+              <div class="privateCircleListBox relative">
+                <ul type="none" class="privateCircleList" id="">
+                    <li ng-repeat="circle in circleC.privateCircles" value="{{circle.key}}" ng-class="menu.getUserCircle()==circle.key ? 'active' : 'blaa'" ng-click="circleC.setCurrentCircle(circle.key)">
+                      <div class="userCountPast">{{circle.value.user_count}}</div>
+                        {{circle.value.circle_name}} 
+                    </li>
+                    
+                  
+                </ul>
+                <ul type="none" class="privateCircleButtonList" id="">
+                    <li ng-repeat="circle in circleC.privateCircles" >
+                      <button ng-click="circleC.configureCircle(circle.key)" class="configureCircleButton btn btn-xs btn-secondary pull-right">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                      </button>
+                    </li>   
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div ng-show="circleC.configureCircleBool">
+                <h2>Ajouter une personne au cercle:</h2>
+                <form class="form-circle" role="form" method="post" ng-submit="circleC.addUserToCircle()">
+                
+                  <input type="text" ng-model="circle_name" disabled class="form-control" placeholder="Nom du cercle">
+                  <input type="text" ng-model="circle_id" class="hidden form-control">
+                  <br>
+                  <input type="text" ng-model="user_to_add" class="form-control" placeholder="Pseudonyme">
+                  
+                  <br>
+
+                  <div ng-show="circleC.result" class='feedbackBox'>
+                    <p class="bg-success" style="padding:8px;" ng-show="circleC.result.value">{{circleC.result.status}}
+                    <span class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span></p>
+                    <p class="bg-danger" style="padding:8px;" ng-hide="circleC.result.value">{{circleC.result.status}}
+                    <span class="glyphicon glyphicon-remove pull-right" aria-hidden="true"></span></p>
+                  </div>
+                
+
+                  <button class="btn btn-lg btn-primary btn-block pull-right" type="submit">Ajouter la personne</button>
+                </form>
+                <br>
+                <h2 style="margin-top:50px;">Personnes invité dans le cercle:</h2>
+                <ul>
+                  <li ng-repeat="user in circleC.usersLinked" >{{user.value.user_name | capitalize}}</li>
+                </ul>
+              </div>
+              <div ng-hide="circleC.configureCircleBool" ng-controller="CircleFormController as circleForm">
+                <h2>Créer un cercle d'écoute:</h2>
+                <form class="form-circle" role="form" method="post" ng-submit="circleForm.addCircle()">
+                  <input type="text" ng-model="circle_name" class="form-control" placeholder="Nom du cercle">
+                  <br>
+                  <select class="form-control" disabled="" >
+                    <option selected disabled>Type de musique</option>
+                  </select>
+                  <br>
+                  <label class="checkbox-inline"><input type="checkbox" ng-model="private_circle" value=""> Cercle privé </label>
+                  <br>
+
+                  <div ng-show="circleForm.result" class='feedbackBox'>
+                    <p class="bg-success" style="padding:8px;" ng-show="circleForm.result.value">{{circleForm.result.status}}
+                    <span class="glyphicon glyphicon-ok pull-right" aria-hidden="true"></span></p>
+                    <p class="bg-danger" style="padding:8px;" ng-hide="circleForm.result.value">{{circleForm.result.status}}
+                    <span class="glyphicon glyphicon-remove pull-right" aria-hidden="true"></span></p>
+                  </div>
+                
+
+                  <button class="btn btn-lg btn-primary btn-block pull-right" type="submit">Créer le cercle</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="frontPage row" ng-if="menu.isSelected(2)" ng-controller="playlistController as playlist">
+            <div class="frontpageContainer col-md-10 col-md-offset-1">
+              <div class="videoContainer col-md-8 col-sm-8 col-lg-8 col-xs-8"> 
+                <div class="embed-responsive embed-responsive-16by9">
+                  <youtube-video class="embed-responsive-item" video-id="playlist.currentVideoId" player="youtubePlayer"></youtube-video>
+                </div>
+                <div class="noVideo">Pas de vidéo encore :(<br><span style="font-size:15px">Rajoutes-en en copiant le lien youtube<br> dans la boite en bas à droite !</span></div>
+              </div>
+              <div class="peopleContainer col-md-4 col-sm-4 col-lg-4 col-xs-4"> 
+                <h3 class="blueTitle">{{playlist.currentCircle.circle_name}}</h3>
+                <ul>
+                  <li ng-repeat="user in playlist.usersLinked" class="{{user.value.currentStatus}}">
+                    <div class="name">{{user.value.user_name | capitalize}}</div>
+                    <div class="listeningTo">
+                      {{user.value.currentStatus=="connected" ? "écoute": "écoutais"}}
+                      
+                      <a ng-if="user.value.music_title" ng-click='playlist.changeMusic(user.value.current_music)'>
+                      {{user.value.music_title=="" ? "" : user.value.music_title }}
+                      </a>
+                      <span ng-if="user.value.music_title==''">rien :(</span>
+                      </div>
+                  </li>
+                </ul>
+                <div class="bottomForm">
+                  <form role="form" method="post" ng-submit="playlist.addMusicToCircle()">
+                      <div class="input-group">
+                        <input type="text" class="form-control" ng-model="url" placeholder="{{playlist.result.status ? playlist.result.status : 'Ajoutez une musique'}}">
+                        <span class="input-group-btn">
+                          <button ng-show="playlist.result.value != undefined && playlist.result.value == true" class="btn btn-success" type="submit">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                          </button>
+                          <button ng-show="playlist.result.value != undefined && playlist.result.value == false" class="btn btn-danger" type="submit">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                          </button>
+                          <button ng-hide="playlist.result" class="btn btn-primary" type="submit">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                          </button>
+                        </span>
+                      </div>
+                  </form>
+                </div>
+              </div>
+              <div class="playlistContainer col-md-8 col-sm-8 col-lg-8 col-xs-8"> 
+                <ul>
+                  <li ng-repeat="music in playlist.musicLinked" ng-click="playlist.changeMusic(music.value.music_id)" class="{{music.value.status}}" id="{{music.key}}"><img alt="{{music.value.music_title | capitalize}}" ng-src="{{music.value.src}}">
+                    <div class="title">{{music.value.music_title | capitalize}}</div>
+                    <div class="musicSub"><span class="viewCounter"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> {{music.value.view_counter}}</span> <span class="pull-right">Posté par: {{music.value.user_name | capitalize}}</span></div>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+            
+          </div>
+
+          
+          <!-- END CONTAINER -->
+        
+        </div>
+        <div class="loading row" ng-show="menu.showBlackLoadingScreen" >
+          <div class="loadingGif"><img src="img/loadingblack.GIF"></div>
+        </div>
+
+        <div class="loading row" ng-show="menu.showWhiteLoadingScreen" >
+          <div class="loadingGif"><img src="img/loadingwhite.GIF"></div>
+        </div>
+      </div>
+    </div>
+
+
+   
+
+  </body>
+</html>
